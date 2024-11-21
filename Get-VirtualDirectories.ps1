@@ -1,3 +1,24 @@
+<# 
+.SYNOPSIS
+    Retrieves the internal and external URLs of all Exchange virtual directories across all servers in the organization.
+.DESCRIPTION
+    This script dynamically discovers all Exchange servers in the organization and retrieves the internal and external URLs 
+    for OWA, EWS, ActiveSync, OAB, and PowerShell virtual directories.
+
+.AUTHOR
+    Colin McMorrow
+    mcmorrow.colin@gmail.com
+
+.VERSION
+    1.0
+
+.NOTES
+    - Requires the Exchange Management tools or Exchange Management Shell.
+    - Ensure the user running the script has sufficient permissions to execute Exchange cmdlets.
+    - Outputs URLs to the console in a structured format.
+
+#>
+
 # Get all Exchange servers
 $servers = Get-ExchangeServer | Select-Object -ExpandProperty Name
 
