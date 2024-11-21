@@ -10,13 +10,6 @@ if (-not (Read-Host "Is this correct? (Y/N)").ToUpper().StartsWith("Y")) {
     exit
 }
 
-# Confirm the update
-$confirmUpdate = Read-Host "Would you like to set all virtual directories to use this domain? (Y/N)"
-if (-not $confirmUpdate.ToUpper().StartsWith("Y")) {
-    Write-Host "Operation cancelled by user." -ForegroundColor Red
-    exit
-}
-
 # Prompt for the server name
 $server = Read-Host "Enter the Exchange server name"
 if (-not (Get-ExchangeServer -ErrorAction SilentlyContinue | Where-Object {$_.Name -eq $server})) {
@@ -24,77 +17,95 @@ if (-not (Get-ExchangeServer -ErrorAction SilentlyContinue | Where-Object {$_.Na
     exit
 }
 
-# Process and update each virtual directory type separately
-Write-Host "Updating virtual directories for server: $server" -ForegroundColor Cyan
+# Helper function to display and confirm changes
+function Show-Change {
+    param (
+        [string]$VirtualDirectoryName,
+        [string]$OldInternalUrl,
+        [string]$OldExternalUrl,
+        [string]$NewInternalUrl,
+        [string]$NewExternalUrl
+    )
+    
+    Write-Host "Updating $VirtualDirectoryName" -ForegroundColor Cyan
+    Write-Host "Old Internal URL: $OldInternalUrl" -ForegroundColor Yellow
+    Write-Host "New Internal URL: $NewInternalUrl" -ForegroundColor Green
+    Write-Host "Old External URL: $OldExternalUrl" -ForegroundColor Yellow
+    Write-Host "New External URL: $NewExternalUrl" -ForegroundColor Green
+    return (Read-Host "Proceed with this change? (Y/N)").ToUpper().StartsWith("Y")
+}
+
+# Process and update each virtual directory type
+Write-Host "Processing virtual directories for server: $server" -ForegroundColor Cyan
 
 # OWA Virtual Directory
 Get-OwaVirtualDirectory -Server $server | ForEach-Object {
-    $_.InternalUrl = "https://$domain/owa"
-    $_.ExternalUrl = "https://$domain/owa"
-    Set-OwaVirtualDirectory -Identity $_.Identity -InternalUrl $_.InternalUrl -ExternalUrl $_.ExternalUrl
-    Write-Host "Updated OWA: InternalUrl and ExternalUrl set to https://$domain/owa" -ForegroundColor Green
+    $newInternalUrl = "https://$domain/owa"
+    $newExternalUrl = "https://$domain/owa"
+    if (Show-Change "OWA Virtual Directory" $_.InternalUrl $_.ExternalUrl $newInternalUrl $newExternalUrl) {
+        Set-OwaVirtualDirectory -Identity $_.Identity -InternalUrl $newInternalUrl -ExternalUrl $newExternalUrl
+        Write-Host "OWA Virtual Directory updated successfully." -ForegroundColor Green
+    } else {
+        Write-Host "OWA Virtual Directory update skipped." -ForegroundColor Red
+    }
 }
 
 # EWS Virtual Directory
 Get-WebServicesVirtualDirectory -Server $server | ForEach-Object {
-    $_.InternalUrl = "https://$domain/ews/exchange.asmx"
-    $_.ExternalUrl = "https://$domain/ews/exchange.asmx"
-    Set-WebServicesVirtualDirectory -Identity $_.Identity -InternalUrl $_.InternalUrl -ExternalUrl $_.ExternalUrl
-    Write-Host "Updated EWS: InternalUrl and ExternalUrl set to https://$domain/ews/exchange.asmx" -ForegroundColor Green
+    $newInternalUrl = "https://$domain/ews/exchange.asmx"
+    $newExternalUrl = "https://$domain/ews/exchange.asmx"
+    if (Show-Change "EWS Virtual Directory" $_.InternalUrl $_.ExternalUrl $newInternalUrl $newExternalUrl) {
+        Set-WebServicesVirtualDirectory -Identity $_.Identity -InternalUrl $newInternalUrl -ExternalUrl $newExternalUrl
+        Write-Host "EWS Virtual Directory updated successfully." -ForegroundColor Green
+    } else {
+        Write-Host "EWS Virtual Directory update skipped." -ForegroundColor Red
+    }
 }
 
 # ActiveSync Virtual Directory
 Get-ActiveSyncVirtualDirectory -Server $server | ForEach-Object {
-    $_.InternalUrl = "https://$domain/Microsoft-Server-ActiveSync"
-    $_.ExternalUrl = "https://$domain/Microsoft-Server-ActiveSync"
-    Set-ActiveSyncVirtualDirectory -Identity $_.Identity -InternalUrl $_.InternalUrl -ExternalUrl $_.ExternalUrl
-    Write-Host "Updated ActiveSync: InternalUrl and ExternalUrl set to https://$domain/Microsoft-Server-ActiveSync" -ForegroundColor Green
+    $newInternalUrl = "https://$domain/Microsoft-Server-ActiveSync"
+    $newExternalUrl = "https://$domain/Microsoft-Server-ActiveSync"
+    if (Show-Change "ActiveSync Virtual Directory" $_.InternalUrl $_.ExternalUrl $newInternalUrl $newExternalUrl) {
+        Set-ActiveSyncVirtualDirectory -Identity $_.Identity -InternalUrl $newInternalUrl -ExternalUrl $newExternalUrl
+        Write-Host "ActiveSync Virtual Directory updated successfully." -ForegroundColor Green
+    } else {
+        Write-Host "ActiveSync Virtual Directory update skipped." -ForegroundColor Red
+    }
 }
 
 # OAB Virtual Directory
 Get-OabVirtualDirectory -Server $server | ForEach-Object {
-    $_.InternalUrl = "https://$domain/oab"
-    $_.ExternalUrl = "https://$domain/oab"
-    Set-OabVirtualDirectory -Identity $_.Identity -InternalUrl $_.InternalUrl -ExternalUrl $_.ExternalUrl
-    Write-Host "Updated OAB: InternalUrl and ExternalUrl set to https://$domain/oab" -ForegroundColor Green
+    $newInternalUrl = "https://$domain/oab"
+    $newExternalUrl = "https://$domain/oab"
+    if (Show-Change "OAB Virtual Directory" $_.InternalUrl $_.ExternalUrl $newInternalUrl $newExternalUrl) {
+        Set-OabVirtualDirectory -Identity $_.Identity -InternalUrl $newInternalUrl -ExternalUrl $newExternalUrl
+        Write-Host "OAB Virtual Directory updated successfully." -ForegroundColor Green
+    } else {
+        Write-Host "OAB Virtual Directory update skipped." -ForegroundColor Red
+    }
 }
 
 # PowerShell Virtual Directory
 Get-PowerShellVirtualDirectory -Server $server | ForEach-Object {
-    $_.InternalUrl = "https://$domain/powershell"
-    $_.ExternalUrl = "https://$domain/powershell"
-    Set-PowerShellVirtualDirectory -Identity $_.Identity -InternalUrl $_.InternalUrl -ExternalUrl $_.ExternalUrl
-    Write-Host "Updated PowerShell: InternalUrl and ExternalUrl set to https://$domain/powershell" -ForegroundColor Green
+    $newInternalUrl = "https://$domain/powershell"
+    $newExternalUrl = "https://$domain/powershell"
+    if (Show-Change "PowerShell Virtual Directory" $_.InternalUrl $_.ExternalUrl $newInternalUrl $newExternalUrl) {
+        Set-PowerShellVirtualDirectory -Identity $_.Identity -InternalUrl $newInternalUrl -ExternalUrl $newExternalUrl
+        Write-Host "PowerShell Virtual Directory updated successfully." -ForegroundColor Green
+    } else {
+        Write-Host "PowerShell Virtual Directory update skipped." -ForegroundColor Red
+    }
 }
 
 # MAPI Virtual Directory
 Get-MAPIVirtualDirectory -Server $server | ForEach-Object {
-    $_.InternalUrl = "https://$domain/mapi"
-    $_.ExternalUrl = "https://$domain/mapi"
-    Set-MAPIVirtualDirectory -Identity $_.Identity -InternalUrl $_.InternalUrl -ExternalUrl $_.ExternalUrl
-    Write-Host "Updated MAPI: InternalUrl and ExternalUrl set to https://$domain/mapi" -ForegroundColor Green
+    $newInternalUrl = "https://$domain/mapi"
+    $newExternalUrl = "https://$domain/mapi"
+    if (Show-Change "MAPI Virtual Directory" $_.InternalUrl $_.ExternalUrl $newInternalUrl $newExternalUrl) {
+        Set-MAPIVirtualDirectory -Identity $_.Identity -InternalUrl $newInternalUrl -ExternalUrl $newExternalUrl
+        Write-Host "MAPI Virtual Directory updated successfully." -ForegroundColor Green
+    } else {
+        Write-Host "MAPI Virtual Directory update skipped." -ForegroundColor Red
+    }
 }
-
-# Outlook Anywhere
-Get-OutlookAnywhere -Server $server | ForEach-Object {
-    Set-OutlookAnywhere -Identity $_.Identity -InternalHostname $domain -ExternalHostname $domain -InternalClientsRequireSsl $true -ExternalClientsRequireSsl $true -SSLOffloading $false -ExternalClientAuthenticationMethod NTLM -InternalClientAuthenticationMethod NTLM
-    Write-Host "Updated Outlook Anywhere: Hostname set to $domain" -ForegroundColor Green
-}
-
-# Verify and update AutodiscoverInternalURI
-$cas = Get-ClientAccessServer -Identity $server
-if ($cas.AutodiscoverInternalURI -ne "https://$domain/autodiscover/autodiscover.xml") {
-    Set-ClientAccessServer -Identity $server -AutodiscoverServiceInternalURI "https://$domain/autodiscover/autodiscover.xml"
-    Write-Host "AutodiscoverInternalURI updated to https://$domain/autodiscover/autodiscover.xml" -ForegroundColor Green
-} else {
-    Write-Host "AutodiscoverInternalURI is already set correctly." -ForegroundColor Green
-}
-
-# Print final virtual directory URLs
-Write-Host "Final Virtual Directory URLs for server: $server" -ForegroundColor Cyan
-Get-OwaVirtualDirectory -Server $server | Select-Object Name, InternalUrl, ExternalUrl
-Get-WebServicesVirtualDirectory -Server $server | Select-Object Name, InternalUrl, ExternalUrl
-Get-ActiveSyncVirtualDirectory -Server $server | Select-Object Name, InternalUrl, ExternalUrl
-Get-OabVirtualDirectory -Server $server | Select-Object Name, InternalUrl, ExternalUrl
-Get-PowerShellVirtualDirectory -Server $server | Select-Object Name, InternalUrl, ExternalUrl
-Get-MAPIVirtualDirectory -Server $server | Select-Object Name, InternalUrl, ExternalUrl
