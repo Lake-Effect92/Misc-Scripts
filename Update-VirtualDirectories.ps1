@@ -1,3 +1,32 @@
+<# 
+.SYNOPSIS
+This script updates Exchange virtual directory URLs to use a user-specified external domain name.
+
+.DESCRIPTION
+The script performs the following tasks:
+1. Prompts the user for the external domain name and validates the input.
+2. Prompts for the Exchange server name and verifies the server is valid.
+3. Displays the current internal and external URLs for each virtual directory.
+4. Allows the user to confirm changes before updating each virtual directory.
+5. Updates the internal and external URLs for OWA, EWS, ActiveSync, OAB, PowerShell, and MAPI virtual directories.
+
+.NOTES
+Author: Colin McMorrow
+Date: 11/21/2024
+Version: 2.0
+Requires: Exchange Management Shell
+
+.PARAMETER Domain
+The external DNS name to set for all virtual directories.
+
+.PARAMETER Server
+The name of the Exchange server whose virtual directories will be updated.
+
+.OUTPUTS
+The script outputs the old and new URLs for each virtual directory and confirms updates.
+
+#>
+
 # Prompt for the external DNS name
 $domain = Read-Host "Enter the external DNS name for your Exchange (e.g., mail.domain.com)"
 if (-not $domain -or $domain -notmatch '^[a-zA-Z0-9.-]+$') {
