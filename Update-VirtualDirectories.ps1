@@ -6,7 +6,8 @@
     directories to use the specified domain for both internal and external URLs. It also verifies the Autodiscover 
     URI and displays the final configuration.
 .AUTHOR
-    [Your Name or Organization]
+    Colin McMorrow
+    mcmorrow.colin@gmail.com
 .VERSION
     1.0
 .NOTES
@@ -40,7 +41,7 @@ if (-not (Get-ExchangeServer -ErrorAction SilentlyContinue | Where-Object {$_.Na
     exit
 }
 
-# Update virtual directories
+# Collect virtual directories individually
 $virtualDirectories = @(
     Get-OwaVirtualDirectory -Server $server,
     Get-WebServicesVirtualDirectory -Server $server,
