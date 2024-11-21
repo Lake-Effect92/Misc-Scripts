@@ -77,7 +77,7 @@ Get-MAPIVirtualDirectory -Server $server | ForEach-Object {
 
 # Outlook Anywhere
 Get-OutlookAnywhere -Server $server | ForEach-Object {
-    Set-OutlookAnywhere -Identity $_.Identity -InternalHostname $domain -ExternalHostname $domain -InternalClientsRequireSsl $true -ExternalClientsRequireSsl $true -SSLOffloading $false
+    Set-OutlookAnywhere -Identity $_.Identity -InternalHostname $domain -ExternalHostname $domain -InternalClientsRequireSsl $true -ExternalClientsRequireSsl $true -SSLOffloading $false -ExternalClientAuthenticationMethod NTLM -InternalClientAuthenticationMethod NTLM
     Write-Host "Updated Outlook Anywhere: Hostname set to $domain" -ForegroundColor Green
 }
 
