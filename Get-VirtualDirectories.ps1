@@ -26,11 +26,10 @@ $servers = Get-ExchangeServer | Select-Object -ExpandProperty Name
 foreach ($server in $servers) {
     Write-Host "Retrieving virtual directory URLs for server: $server" -ForegroundColor Green
     
-    Get-ClientAccessServer -Identity $server | Select-Object Name, InternalUrl, ExternalUrl | ForEach-Object {
+    Get-ClientAccessServer -Identity $server | Select-Object Name, AutoDiscoverServiceInternalUri | ForEach-Object {
         Write-Host "Client Access Server URLs:"
         Write-Host "Name: $($_.Name)"
-        Write-Host "InternalUrl: $($_.InternalUrl)"
-        Write-Host "ExternalUrl: $($_.ExternalUrl)"
+        Write-Host "AutoDiscoverServiceInternalUri: $($_.AutoDiscoverServiceInternalUri)"
         Write-Host "---------------------------"
     }
 
